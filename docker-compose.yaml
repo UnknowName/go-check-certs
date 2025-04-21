@@ -1,0 +1,10 @@
+check-certs:
+  image: check-certs
+  container_name: check-certs
+  restart: always
+  net: host
+  volumes:
+    - ./config.yaml:/tmp/config.yaml:ro
+    - /etc/localtime:/etc/localtime:ro
+  command:
+    /check-certs --config=/tmp/config.yaml

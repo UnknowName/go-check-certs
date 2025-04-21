@@ -1,0 +1,34 @@
+# check timeout 10 seconds
+timeout: 10
+
+# before expire days send msg
+warnDays: 10
+
+# support
+# - file  local file
+# - aliyun aliyun
+# - west  west digital
+providers:
+  - name: aliyun1
+    provider: aliyun
+    config:
+      keyId: keyId
+      keySecret: secret
+      region: cn-shenzhen
+      domains: example.cn
+
+  - name: local-file
+    provider: file
+    config:
+      filePath: hosts
+
+  - name: west digital
+    provider: west
+    config:
+      apiKey: key
+      domains: a.com,b.com
+
+notifies:
+  - type: dding
+    config:
+      url: full-url
