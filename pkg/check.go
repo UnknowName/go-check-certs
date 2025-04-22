@@ -74,6 +74,9 @@ func (sc *SimpleCheck) Check(warnDays int) {
 }
 
 func (sc *SimpleCheck) checkHostHttps(host string, warnDays int) {
+	if host == "" || host[0] == '@' {
+		return
+	}
 	values := strings.Split(host, ":")
 	if len(values) == 1 {
 		host = fmt.Sprintf("%s:443", host)
