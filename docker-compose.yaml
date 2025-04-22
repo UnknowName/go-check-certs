@@ -1,10 +1,15 @@
-check-certs:
-  image: check-certs
-  container_name: check-certs
-  restart: always
-  net: host
-  volumes:
+version: '3'
+
+services:
+  check-certs:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: check-certs
+    container_name: check-certs
+    restart: always
+    network_mode: host
+    volumes:
     - ./config.yaml:/tmp/config.yaml:ro
     - /etc/localtime:/etc/localtime:ro
-  command:
-    /check-certs --config=/tmp/config.yaml
+    command: /check-certs --config=/tmp/config.yaml
