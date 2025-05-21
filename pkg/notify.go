@@ -44,7 +44,7 @@ func (dn *DDingNotify) Send(waitTime time.Duration) {
 			msgs[msg.WarnMsg] = append(msgs[msg.WarnMsg], msg.Host)
 		case <-ticker.C:
 			if len(msgs) == 0 {
-				log.Println("DEBUG no messages need to send")
+				log.Println("DEBUG no messages need to be sent")
 				continue
 			}
 			httpClient := http.Client{Timeout: defaultTimeout}
@@ -56,10 +56,10 @@ func (dn *DDingNotify) Send(waitTime time.Duration) {
 			msg := newDMessage(strings.Join(sendMsgs, "\n"), nil, false)
 			resp, err := httpClient.Post(dn.url, contentType, bytes.NewBuffer(msg.Encode()))
 			if err != nil {
-				log.Println("ERROR DDing Notify send failed", err)
+				log.Println("ERROR  notify send failed", err)
 			} else {
 				_re, _ := io.ReadAll(resp.Body)
-				log.Println("DEBUG dding response", string(_re))
+				log.Println("DEBUG notify response", string(_re))
 			}
 			msgs = make(map[string][]string, 0)
 		}

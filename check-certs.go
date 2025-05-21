@@ -25,8 +25,10 @@ func main() {
 	hostChan := make(chan string, cacheSize)
 	resChan := make(chan pkg.CheckResult)
 	waitTime := time.Duration(config.Timeout) * 10 * time.Second
-	notify := pkg.NewNotify(config.Notifies[0], resChan)
-	go notify.Send(waitTime)
+	for _, nc := range config.Notifies {
+		notify := pkg.NewNotify(nc, resChan)
+		go notify.Send(waitTime)
+	}
 	for {
 		log.Println("DEBUG start new check")
 		for _, pConf := range config.Providers {

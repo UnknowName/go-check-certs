@@ -5,5 +5,4 @@ import (
 )
 
 func TestNewDNSProvider(t *testing.T) {
-
 }
