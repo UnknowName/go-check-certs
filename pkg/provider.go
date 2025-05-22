@@ -25,6 +25,7 @@ const (
 	west        = "west"
 	baseURL     = "https://api.west.cn/API/v2/domain/dns/"
 	queryAction = "dnsrec.list"
+	enable      = "ENABLE"
 )
 
 var dnsTypes = [2]string{"A", "CNAME"}
@@ -91,6 +92,7 @@ func (ap *AliyunProvider) fetchWithRetry(domain, dnsType string, page, pageSize 
 		PageNumber: tea.Int64(page),
 		DomainName: tea.String(domain),
 		Type:       tea.String(dnsType),
+		Status:     tea.String(enable),
 	}
 	var lastErr error
 	for retry := 0; retry < maxRetry; retry++ {
@@ -245,8 +247,9 @@ func (wd *WestDigitalProvider) queryDomainRecord(domain, recordType string, out 
 		return errors.New("remote provider service error")
 	}
 	for _, record := range wp.Body.Items {
-		// log.Println("DEBUG", record)
-		out <- fmt.Sprintf("%s.%s", record["hostname"], domain)
+		if record["pause"].(float64) == 0 {
+			out <- fmt.Sprintf("%s.%s", record["hostname"], domain)
+		}
 	}
 	return nil
 }
