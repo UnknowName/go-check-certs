@@ -81,6 +81,10 @@ func (sc *SimpleCheck) checkHostHttps(host string, warnDays int) {
 	if len(values) == 1 {
 		host = fmt.Sprintf("%s:443", host)
 	}
+	if host[0] == '*' {
+		// *为泛域名解析，需要指定一个字符串来替换它
+		host = fmt.Sprintf("%s%s:443", "abcdefzhki", host[1:])
+	}
 	conn, err := tls.Dial("tcp", host, nil)
 	if err != nil {
 		if strings.Contains(err.Error(), "certificate has expired") {

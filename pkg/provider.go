@@ -120,8 +120,7 @@ func (ap *AliyunProvider) getRecords(domain, dnsType string, out chan<- string) 
 		log.Printf("Get domain %s total page failed %s", domain, err)
 		return
 	}
-	// var wg sync.WaitGroup
-	// wg.Add(int(totalPage)-1) // 从第2页开始，因此减少1
+	// 从第2页开始，因此减少1
 	for page := int64(2); page <= totalPage; page++ {
 		go ap.fetchWithRetry(domain, dnsType, page, defaultSize, out)
 	}
