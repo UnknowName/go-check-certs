@@ -162,6 +162,8 @@ func (fp *FileProvider) GetAllRecords(out chan<- string) {
 // WestDigital
 
 type WBody struct {
+	Pageno  int
+	Pagecount int
 	Items []map[string]any `json:"items"`
 }
 
@@ -228,26 +230,48 @@ func (wd *WestDigitalProvider) doAction(path string, param map[string]string, is
 	return io.ReadAll(resp.Body)
 }
 
+func (wd *WestDigitalProvider) fetch(param map[string]string) (error, *WestResponse) {
+	resp, err := wd.doAction("", param, false)
+	if err != nil {
+		return err, nil
+	}
+	wp := new(WestResponse)
+	if err = json.Unmarshal(resp, wp); err != nil {
+		return err, nil
+	}
+	if wp.Code == 500 {
+		return errors.New("remote provider service error"), nil
+	}
+	return nil, wp
+}
+
 func (wd *WestDigitalProvider) queryDomainRecord(domain, recordType string, out chan<- string) error {
+	// 不带参数时，默认为第一页
 	param := map[string]string{
 		"act":         queryAction,
 		"domain":      domain,
 		"record_type": recordType,
+		"pageno":      "1",
 	}
-	resp, err := wd.doAction("", param, false)
+	err, wp := wd.fetch(param)
 	if err != nil {
 		return err
-	}
-	wp := new(WestResponse)
-	if err = json.Unmarshal(resp, wp); err != nil {
-		return err
-	}
-	if wp.Code == 500 {
-		return errors.New("remote provider service error")
 	}
 	for _, record := range wp.Body.Items {
 		if record["pause"].(float64) == 0 {
 			out <- fmt.Sprintf("%s.%s", record["hostname"], domain)
+		}
+	}
+	for i := 2; i <= wp.Body.Pagecount; i++ {
+		param["pageno"] = fmt.Sprintf("%d", i)
+		err, wp = wd.fetch(param)
+		if err != nil {
+			return err
+		}
+		for _, record := range wp.Body.Items {
+			if record["pause"].(float64) == 0 {
+				out <- fmt.Sprintf("%s.%s", record["hostname"], domain)
+			}
 		}
 	}
 	return nil
