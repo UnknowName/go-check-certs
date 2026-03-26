@@ -100,7 +100,8 @@ func (ap *AliyunProvider) fetchWithRetry(domain, dnsType string, page, pageSize 
 		resp, err := ap.client.DescribeDomainRecordsWithOptions(describeDomainRecordsRequest, runtime)
 		if err == nil && *resp.StatusCode == http.StatusOK {
 			for _, record := range resp.Body.DomainRecords.Record {
-				out <- fmt.Sprintf("%s.%s", *record.RR, domain)
+				host := fmt.Sprintf("%s.%s", *record.RR, domain)
+				out <- host
 			}
 			cnt := *resp.Body.TotalCount / defaultSize
 			if *resp.Body.TotalCount%defaultSize != 0 {

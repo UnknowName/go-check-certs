@@ -24,18 +24,18 @@ func main() {
 	config := pkg.NewConfig(configFile)
 	hostChan := make(chan string, cacheSize)
 	resChan := make(chan pkg.CheckResult)
-	waitTime := time.Duration(config.Timeout) * 10 * time.Second
+	waitTime := time.Duration(config.Timeout) * time.Second
 	for _, nc := range config.Notifies {
 		notify := pkg.NewNotify(nc, resChan)
 		go notify.Send(waitTime)
 	}
+	check := pkg.NewSimpleCheck(hostChan, resChan)
 	for {
 		log.Println("DEBUG start new check")
 		for _, pConf := range config.Providers {
 			provider := pkg.NewProvider(pConf)
 			go provider.GetAllRecords(hostChan)
 		}
-		check := pkg.NewSimpleCheck(hostChan, resChan)
 		check.Check(config.WarnDays)
 		time.Sleep(checkInterval - waitTime)
 	}

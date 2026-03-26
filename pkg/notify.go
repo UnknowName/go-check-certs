@@ -21,6 +21,7 @@ func NewNotify(config *NotifyConfig, in <-chan CheckResult) Notifier {
 		return &DDingNotify{
 			ch:  in,
 			url: config.Get("url"),
+			hosts: make(map[string]bool),
 		}
 	}
 	return nil
@@ -33,6 +34,7 @@ type Notifier interface {
 type DDingNotify struct {
 	ch  <-chan CheckResult
 	url string
+	hosts map[string]bool
 }
 
 func (dn *DDingNotify) Send(waitTime time.Duration) {
@@ -41,6 +43,10 @@ func (dn *DDingNotify) Send(waitTime time.Duration) {
 	for {
 		select {
 		case msg := <-dn.ch:
+			if dn.hosts[msg.Host] {
+				continue
+			}
+			dn.hosts[msg.Host] = true
 			msgs[msg.WarnMsg] = append(msgs[msg.WarnMsg], msg.Host)
 		case <-ticker.C:
 			if len(msgs) == 0 {
@@ -62,6 +68,7 @@ func (dn *DDingNotify) Send(waitTime time.Duration) {
 				log.Println("DEBUG notify response", string(_re))
 			}
 			msgs = make(map[string][]string, 0)
+			dn.hosts = make(map[string]bool)
 		}
 	}
 }
