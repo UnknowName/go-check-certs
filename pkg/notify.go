@@ -19,8 +19,8 @@ func NewNotify(config *NotifyConfig, in <-chan CheckResult) Notifier {
 	switch config.Type {
 	case "dding":
 		return &DDingNotify{
-			ch:  in,
-			url: config.Get("url"),
+			ch:    in,
+			url:   config.Get("url"),
 			hosts: make(map[string]bool),
 		}
 	}
@@ -32,8 +32,8 @@ type Notifier interface {
 }
 
 type DDingNotify struct {
-	ch  <-chan CheckResult
-	url string
+	ch    <-chan CheckResult
+	url   string
 	hosts map[string]bool
 }
 
